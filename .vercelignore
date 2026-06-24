@@ -1,0 +1,13 @@
+.env
+.env.*
+.next
+node_modules
+*.log
+dev.log
+server.log
+client_secret_*.json
+bun.lock
+upload
+download
+mini-services
+examples
