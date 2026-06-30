@@ -23,7 +23,31 @@ import {
 import { toast } from 'sonner'
 import { initMockFetch } from '@/lib/mock-fetch'
 import { getFirebaseAuth, getGoogleProvider, isFirebaseConfigured } from '@/lib/firebase'
-import { getRedirectResult, onAuthStateChanged, signInWithRedirect, type User as FirebaseUser } from 'firebase/auth'
+import {
+  getRedirectResult,
+  onAuthStateChanged,
+  signInWithPopup,
+  signInWithRedirect,
+  type User as FirebaseUser,
+} from 'firebase/auth'
+
+const EXPLICIT_LOGOUT_KEY = 'barrelflow-explicit-logout'
+
+function safeSessionStorageGet(key: string) {
+  try {
+    return window.sessionStorage?.getItem(key) || null
+  } catch {
+    return null
+  }
+}
+
+function safeSessionStorageRemove(key: string) {
+  try {
+    window.sessionStorage?.removeItem(key)
+  } catch {
+    // Some embedded browsers restrict sessionStorage.
+  }
+}
 
 function getGoogleAuthErrorMessage(error: unknown): string {
   const code = typeof error === 'object' && error && 'code' in error
@@ -100,6 +124,7 @@ export function AuthView({ showPasswordLogin = false }: AuthViewProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [authError, setAuthError] = useState('')
   const { setUser, setStore, setSettings } = useAuthStore()
 
   // Dynamic branding state loaded before login
@@ -163,7 +188,7 @@ export function AuthView({ showPasswordLogin = false }: AuthViewProps) {
   useEffect(() => {
     const finishGoogleRedirectSignIn = async () => {
       if (!isFirebaseConfigured()) return
-      if (window.sessionStorage.getItem('barrelflow-explicit-logout') === 'true') return
+      if (safeSessionStorageGet(EXPLICIT_LOGOUT_KEY) === 'true') return
 
       const auth = getFirebaseAuth()
       let didCreateAppSession = false
@@ -172,10 +197,13 @@ export function AuthView({ showPasswordLogin = false }: AuthViewProps) {
         const result = await getRedirectResult(auth)
         if (result?.user) {
           didCreateAppSession = true
+          setAuthError('')
           await createGoogleAppSession(result.user)
         }
       } catch (error) {
-        toast.error(getGoogleAuthErrorMessage(error))
+        const message = getGoogleAuthErrorMessage(error)
+        setAuthError(message)
+        toast.error(message)
       }
 
       const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -183,9 +211,12 @@ export function AuthView({ showPasswordLogin = false }: AuthViewProps) {
 
         didCreateAppSession = true
         try {
+          setAuthError('')
           await createGoogleAppSession(firebaseUser)
         } catch (error) {
-          toast.error(getGoogleAuthErrorMessage(error))
+          const message = getGoogleAuthErrorMessage(error)
+          setAuthError(message)
+          toast.error(message)
         }
       })
 
@@ -238,19 +269,40 @@ export function AuthView({ showPasswordLogin = false }: AuthViewProps) {
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
+    setAuthError('')
     try {
       if (!isFirebaseConfigured()) {
-        toast.error('Firebase Google login is not configured yet.')
+        const message = 'Firebase Google login is not configured yet.'
+        setAuthError(message)
+        toast.error(message)
         return
       }
 
-      window.sessionStorage.removeItem('barrelflow-explicit-logout')
+      safeSessionStorageRemove(EXPLICIT_LOGOUT_KEY)
       const auth = getFirebaseAuth()
       const provider = getGoogleProvider()
 
-      await signInWithRedirect(auth, provider)
+      try {
+        const result = await signInWithPopup(auth, provider)
+        await createGoogleAppSession(result.user)
+      } catch (error) {
+        const code = typeof error === 'object' && error && 'code' in error
+          ? String((error as { code?: unknown }).code)
+          : ''
+
+        if (code === 'auth/popup-closed-by-user') {
+          const message = getGoogleAuthErrorMessage(error)
+          setAuthError(message)
+          toast.error(message)
+          return
+        }
+
+        await signInWithRedirect(auth, provider)
+      }
     } catch (error) {
-      toast.error(getGoogleAuthErrorMessage(error))
+      const message = getGoogleAuthErrorMessage(error)
+      setAuthError(message)
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }
@@ -526,6 +578,12 @@ export function AuthView({ showPasswordLogin = false }: AuthViewProps) {
                     )}
                     Continue with Google
                   </Button>
+
+                  {authError ? (
+                    <div className="rounded-lg border border-red-400/25 bg-red-950/30 px-4 py-3 text-sm leading-6 text-red-100">
+                      {authError}
+                    </div>
+                  ) : null}
 
                   {showPasswordLogin ? (
                     <>

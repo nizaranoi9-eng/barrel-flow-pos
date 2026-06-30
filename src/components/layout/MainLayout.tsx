@@ -34,6 +34,14 @@ interface MainLayoutProps {
   children: React.ReactNode
 }
 
+function markExplicitLogout() {
+  try {
+    window.sessionStorage?.setItem('barrelflow-explicit-logout', 'true')
+  } catch {
+    // Some embedded browsers restrict sessionStorage.
+  }
+}
+
 const navItems = [
   { 
     id: 'dashboard', 
@@ -187,7 +195,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   const handleLogout = async () => {
     if (confirm('Are you sure you want to logout?')) {
       try {
-        window.sessionStorage.setItem('barrelflow-explicit-logout', 'true')
+        markExplicitLogout()
         await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
         if (isFirebaseConfigured()) {
           await signOut(getFirebaseAuth())
