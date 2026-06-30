@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -79,7 +80,12 @@ function adjustBrightness(hex: string, percent: number): string {
   return `#${rr}${gg}${bb}`;
 }
 
-export function AuthView() {
+type AuthViewProps = {
+  showPasswordLogin?: boolean
+}
+
+export function AuthView({ showPasswordLogin = false }: AuthViewProps) {
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const { setUser, setStore, setSettings } = useAuthStore()
@@ -117,6 +123,7 @@ export function AuthView() {
     setStore(session.data.store)
     if (session.data.settings) setSettings(session.data.settings)
     toast.success('Welcome back!')
+    router.push('/')
   }
 
   useEffect(() => {
@@ -184,6 +191,7 @@ export function AuthView() {
         setStore(data.data.store)
         if (data.data.settings) setSettings(data.data.settings)
         toast.success('Welcome back!')
+        router.push('/')
       } else {
         toast.error(response.status === 503 ? data.error : 'Invalid email or password.')
       }
@@ -401,7 +409,7 @@ export function AuthView() {
         {/* Auth Card */}
         <Card className="bg-[#151C2C]/90 border-slate-800 shadow-2xl backdrop-blur-md">
           <CardContent className="pt-6 text-slate-200">
-            <form onSubmit={handleLogin} className="space-y-4">
+            <form onSubmit={showPasswordLogin ? handleLogin : (event) => event.preventDefault()} className="space-y-4">
               <Button
                 type="button"
                 variant="outline"
@@ -416,63 +424,72 @@ export function AuthView() {
                 )}
                 Continue with Google
               </Button>
-              <div className="flex items-center gap-3 text-xs text-slate-500">
-                <div className="h-px flex-1 bg-slate-800" />
-                <span>or</span>
-                <div className="h-px flex-1 bg-slate-800" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-slate-300">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@demo.com"
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
-                  required
-                  disabled={isLoading}
-                  className="bg-[#0B0F19] border-slate-800 text-white placeholder-slate-600 focus-visible:ring-amber-500"
-                />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-3">
-                  <Label htmlFor="password" className="text-slate-300">Password</Label>
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="h-auto p-0 text-xs text-amber-500 hover:text-amber-400"
-                    disabled={isLoading}
-                    onClick={handlePasswordResetEmail}
-                  >
-                    Send reset link
+
+              {showPasswordLogin ? (
+                <>
+                  <div className="flex items-center gap-3 text-xs text-slate-500">
+                    <div className="h-px flex-1 bg-slate-800" />
+                    <span>or</span>
+                    <div className="h-px flex-1 bg-slate-800" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-slate-300">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="admin@demo.com"
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      required
+                      disabled={isLoading}
+                      className="bg-[#0B0F19] border-slate-800 text-white placeholder-slate-600 focus-visible:ring-amber-500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <Label htmlFor="password" className="text-slate-300">Password</Label>
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="h-auto p-0 text-xs text-amber-500 hover:text-amber-400"
+                        disabled={isLoading}
+                        onClick={handlePasswordResetEmail}
+                      >
+                        Send reset link
+                      </Button>
+                    </div>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="••••••••"
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
+                        required
+                        disabled={isLoading}
+                        className="bg-[#0B0F19] border-slate-800 text-white placeholder-slate-600 focus-visible:ring-amber-500"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3 text-slate-400 hover:text-white"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                  <Button type="submit" className="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-bold" disabled={isLoading}>
+                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2 text-black" /> : null}
+                    Login
                   </Button>
+                </>
+              ) : (
+                <div className="rounded-md border border-slate-800 bg-[#0B0F19]/80 px-3 py-2 text-center text-xs text-slate-400">
+                  Staff access is managed with Google sign-in.
                 </div>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••••"
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    required
-                    disabled={isLoading}
-                    className="bg-[#0B0F19] border-slate-800 text-white placeholder-slate-600 focus-visible:ring-amber-500"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-0 top-0 h-full px-3 text-slate-400 hover:text-white"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </Button>
-                </div>
-              </div>
-              <Button type="submit" className="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-bold" disabled={isLoading}>
-                {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2 text-black" /> : null}
-                Login
-              </Button>
+              )}
             </form>
           </CardContent>
         </Card>
