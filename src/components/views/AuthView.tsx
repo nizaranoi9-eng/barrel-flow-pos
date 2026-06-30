@@ -23,7 +23,7 @@ import {
 import { toast } from 'sonner'
 import { initMockFetch } from '@/lib/mock-fetch'
 import { getFirebaseAuth, getGoogleProvider, isFirebaseConfigured } from '@/lib/firebase'
-import { getRedirectResult, signInWithPopup, signInWithRedirect, type User as FirebaseUser } from 'firebase/auth'
+import { getRedirectResult, signInWithRedirect, type User as FirebaseUser } from 'firebase/auth'
 
 function getGoogleAuthErrorMessage(error: unknown): string {
   const code = typeof error === 'object' && error && 'code' in error
@@ -51,7 +51,7 @@ function getGoogleAuthErrorMessage(error: unknown): string {
   }
 
   if (code === 'auth/internal-error') {
-    return 'Firebase could not start Google sign-in. Make sure Google sign-in is enabled and localhost is added under Firebase authorized domains.'
+    return 'Firebase could not start Google sign-in. Make sure Google sign-in is enabled and localhost, 127.0.0.1, and barrel-flow-pos.vercel.app are added under Firebase authorized domains.'
   }
 
   return error instanceof Error ? error.message : 'Google login failed.'
@@ -225,21 +225,7 @@ export function AuthView({ showPasswordLogin = false }: AuthViewProps) {
       const auth = getFirebaseAuth()
       const provider = getGoogleProvider()
 
-      try {
-        const result = await signInWithPopup(auth, provider)
-        await createGoogleAppSession(result.user)
-      } catch (error) {
-        const code = typeof error === 'object' && error && 'code' in error
-          ? String((error as { code?: unknown }).code)
-          : ''
-
-        if (code === 'auth/popup-blocked') {
-          await signInWithRedirect(auth, provider)
-          return
-        }
-
-        throw error
-      }
+      await signInWithRedirect(auth, provider)
     } catch (error) {
       toast.error(getGoogleAuthErrorMessage(error))
     } finally {
