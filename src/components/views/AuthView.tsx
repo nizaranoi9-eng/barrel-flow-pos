@@ -163,6 +163,7 @@ export function AuthView({ showPasswordLogin = false }: AuthViewProps) {
   useEffect(() => {
     const finishGoogleRedirectSignIn = async () => {
       if (!isFirebaseConfigured()) return
+      if (window.sessionStorage.getItem('barrelflow-explicit-logout') === 'true') return
 
       const auth = getFirebaseAuth()
       let didCreateAppSession = false
@@ -243,6 +244,7 @@ export function AuthView({ showPasswordLogin = false }: AuthViewProps) {
         return
       }
 
+      window.sessionStorage.removeItem('barrelflow-explicit-logout')
       const auth = getFirebaseAuth()
       const provider = getGoogleProvider()
 

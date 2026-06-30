@@ -2,6 +2,7 @@
 
 import { useAuthStore, useUIStore, useOfflineStore } from '@/lib/store'
 import { authFetch } from '@/lib/api-client'
+import { getFirebaseAuth, isFirebaseConfigured } from '@/lib/firebase'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -27,6 +28,7 @@ import {
   ShieldAlert
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { signOut } from 'firebase/auth'
 
 interface MainLayoutProps {
   children: React.ReactNode
@@ -185,7 +187,11 @@ export function MainLayout({ children }: MainLayoutProps) {
   const handleLogout = async () => {
     if (confirm('Are you sure you want to logout?')) {
       try {
+        window.sessionStorage.setItem('barrelflow-explicit-logout', 'true')
         await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
+        if (isFirebaseConfigured()) {
+          await signOut(getFirebaseAuth())
+        }
       } catch (error) {
         console.error('Logout error:', error)
       }
