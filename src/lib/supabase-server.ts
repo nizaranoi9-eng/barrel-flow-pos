@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 export function getSupabaseServerConfig() {
   const supabaseUrl = process.env.SUPABASE_URL
   const supabaseAnonKey = process.env.SUPABASE_ANON_KEY
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Supabase server config is missing SUPABASE_URL or SUPABASE_ANON_KEY.')
@@ -11,13 +12,14 @@ export function getSupabaseServerConfig() {
   return {
     supabaseUrl: supabaseUrl.replace(/\/$/, ''),
     supabaseAnonKey,
+    supabaseServiceRoleKey,
   }
 }
 
 export function createSupabaseServerClient() {
-  const { supabaseUrl, supabaseAnonKey } = getSupabaseServerConfig()
+  const { supabaseUrl, supabaseAnonKey, supabaseServiceRoleKey } = getSupabaseServerConfig()
 
-  return createClient(supabaseUrl, supabaseAnonKey, {
+  return createClient(supabaseUrl, supabaseServiceRoleKey || supabaseAnonKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
