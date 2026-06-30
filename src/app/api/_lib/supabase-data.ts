@@ -113,6 +113,9 @@ export async function ensureSessionRows(supabase: SupabaseClient, session: AppSe
       min_legal_age: session.settings.minLegalAge ?? 21,
       require_dob_before_checkout: session.settings.requireDobBeforeCheckout ?? false,
       card_theme_mode: session.settings.cardThemeMode || 'system',
+      ...(typeof session.settings.categoriesInitialized === 'boolean'
+        ? { categories_initialized: session.settings.categoriesInitialized }
+        : {}),
     },
     { onConflict: 'store_id' }
   )
@@ -120,13 +123,29 @@ export async function ensureSessionRows(supabase: SupabaseClient, session: AppSe
 }
 
 export async function ensureDefaultCategories(supabase: SupabaseClient, storeId: string) {
+  const { data: settings, error: settingsReadError } = await supabase
+    .from('store_settings')
+    .select('categories_initialized')
+    .eq('store_id', storeId)
+    .single()
+
+  if (settingsReadError) fail(settingsReadError)
+  if (settings?.categories_initialized) return
+
   const { count, error: countError } = await supabase
     .from('categories')
     .select('id', { count: 'exact', head: true })
     .eq('store_id', storeId)
 
   if (countError) fail(countError)
-  if ((count || 0) > 0) return
+  if ((count || 0) > 0) {
+    const { error } = await supabase
+      .from('store_settings')
+      .update({ categories_initialized: true })
+      .eq('store_id', storeId)
+    if (error) fail(error)
+    return
+  }
 
   const { error } = await supabase.from('categories').insert(
     DEFAULT_CATEGORIES.map((category) => ({
@@ -137,6 +156,12 @@ export async function ensureDefaultCategories(supabase: SupabaseClient, storeId:
     }))
   )
   if (error) fail(error)
+
+  const { error: updateError } = await supabase
+    .from('store_settings')
+    .update({ categories_initialized: true })
+    .eq('store_id', storeId)
+  if (updateError) fail(updateError)
 }
 
 export function mapStore(row: any) {
@@ -167,6 +192,7 @@ export function mapSettings(row: any) {
     minLegalAge: row.min_legal_age,
     requireDobBeforeCheckout: row.require_dob_before_checkout,
     cardThemeMode: row.card_theme_mode,
+    categoriesInitialized: row.categories_initialized,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }

@@ -147,6 +147,7 @@ export interface Settings {
   minLegalAge?: number;
   requireDobBeforeCheckout?: boolean;
   cardThemeMode?: 'light' | 'dark' | null;
+  categoriesInitialized?: boolean;
 }
 
 // Cart Item type (for POS)
@@ -309,4 +310,3 @@ export interface LicenseDocument {
   fileType: string | null;
   createdAt: string;
 }
-

@@ -34,6 +34,9 @@ export async function PUT(request: Request) {
         min_legal_age: body.minLegalAge ?? 21,
         require_dob_before_checkout: body.requireDobBeforeCheckout ?? false,
         card_theme_mode: body.cardThemeMode || 'system',
+        ...(typeof body.categoriesInitialized === 'boolean'
+          ? { categories_initialized: body.categoriesInitialized }
+          : {}),
       })
       .eq('store_id', storeId)
       .select('*')
