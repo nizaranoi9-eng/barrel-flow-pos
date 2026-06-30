@@ -34,7 +34,7 @@ export default function Home() {
       initMockFetch()
     }
 
-    if (isAuthenticated && isClient) {
+    if (isClient) {
       const syncSession = async () => {
         try {
           const res = await fetch('/api/auth/session')
@@ -43,7 +43,7 @@ export default function Home() {
             setUser(data.data.user)
             setStore(data.data.store)
             if (data.data.settings) setSettings(data.data.settings)
-          } else {
+          } else if (isAuthenticated) {
             logout()
           }
         } catch (e) {

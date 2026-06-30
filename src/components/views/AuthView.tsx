@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/store'
 import { Button } from '@/components/ui/button'
@@ -23,7 +23,7 @@ import {
 import { toast } from 'sonner'
 import { initMockFetch } from '@/lib/mock-fetch'
 import { getFirebaseAuth, getGoogleProvider, isFirebaseConfigured } from '@/lib/firebase'
-import { getRedirectResult, signInWithRedirect, type User as FirebaseUser } from 'firebase/auth'
+import { getRedirectResult, onAuthStateChanged, signInWithRedirect, type User as FirebaseUser } from 'firebase/auth'
 
 function getGoogleAuthErrorMessage(error: unknown): string {
   const code = typeof error === 'object' && error && 'code' in error
@@ -110,7 +110,7 @@ export function AuthView({ showPasswordLogin = false }: AuthViewProps) {
   const [loginEmail, setLoginEmail] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
 
-  const createGoogleAppSession = async (firebaseUser: FirebaseUser) => {
+  const createGoogleAppSession = useCallback(async (firebaseUser: FirebaseUser) => {
     if (!firebaseUser.email) {
       throw new Error('Google did not return an email address.')
     }
@@ -136,7 +136,7 @@ export function AuthView({ showPasswordLogin = false }: AuthViewProps) {
     if (session.data.settings) setSettings(session.data.settings)
     toast.success('Welcome back!')
     router.push('/')
-  }
+  }, [router, setSettings, setStore, setUser])
 
   useEffect(() => {
     initMockFetch()
@@ -164,18 +164,39 @@ export function AuthView({ showPasswordLogin = false }: AuthViewProps) {
     const finishGoogleRedirectSignIn = async () => {
       if (!isFirebaseConfigured()) return
 
+      const auth = getFirebaseAuth()
+      let didCreateAppSession = false
+
       try {
-        const result = await getRedirectResult(getFirebaseAuth())
+        const result = await getRedirectResult(auth)
         if (result?.user) {
+          didCreateAppSession = true
           await createGoogleAppSession(result.user)
         }
       } catch (error) {
         toast.error(getGoogleAuthErrorMessage(error))
       }
+
+      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        if (!firebaseUser || didCreateAppSession) return
+
+        didCreateAppSession = true
+        try {
+          await createGoogleAppSession(firebaseUser)
+        } catch (error) {
+          toast.error(getGoogleAuthErrorMessage(error))
+        }
+      })
+
+      return unsubscribe
     }
 
-    finishGoogleRedirectSignIn()
-  }, [])
+    const cleanupPromise = finishGoogleRedirectSignIn()
+
+    return () => {
+      cleanupPromise.then((cleanup) => cleanup?.()).catch(() => {})
+    }
+  }, [createGoogleAppSession])
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
