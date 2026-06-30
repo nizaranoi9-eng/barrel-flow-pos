@@ -69,6 +69,14 @@ export function createGoogleAppSession(input: GoogleSessionInput): AppSession {
   return { user, store, settings }
 }
 
+export function createPasswordAdminSession(email: string): AppSession {
+  return createGoogleAppSession({
+    id: `admin_${email.toLowerCase()}`,
+    email,
+    name: 'Admin',
+  })
+}
+
 export function encodeSession(session: AppSession) {
   return Buffer.from(JSON.stringify(session), 'utf8').toString('base64url')
 }

@@ -185,7 +185,7 @@ export function AuthView() {
         if (data.data.settings) setSettings(data.data.settings)
         toast.success('Welcome back!')
       } else {
-        toast.error('Invalid email or password.')
+        toast.error(response.status === 503 ? data.error : 'Invalid email or password.')
       }
     } catch (error) {
       toast.error('Connection error. Please try again.')
