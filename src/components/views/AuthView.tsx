@@ -7,7 +7,19 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
-import { Store, Eye, EyeOff, Loader2, Chrome } from 'lucide-react'
+import {
+  ArrowRight,
+  BadgeCheck,
+  BarChart3,
+  Boxes,
+  Chrome,
+  Eye,
+  EyeOff,
+  Loader2,
+  ReceiptText,
+  ShieldCheck,
+  Store,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { initMockFetch } from '@/lib/mock-fetch'
 import { getFirebaseAuth, getGoogleProvider, isFirebaseConfigured } from '@/lib/firebase'
@@ -260,8 +272,33 @@ export function AuthView({ showPasswordLogin = false }: AuthViewProps) {
     }
   }
 
+  const brandName = storeData?.name || 'BarrelFlow'
+  const loginCardTitle = showPasswordLogin ? 'Admin access' : 'Sign in to your POS'
+  const loginCardDescription = showPasswordLogin
+    ? 'Use your protected admin credential or continue with Google.'
+    : 'Continue securely with Google to open your store workspace.'
+  const heroBackground =
+    'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=2200&q=85'
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F1322] via-[#080B14] to-[#0A0D1B] flex items-center justify-center p-4">
+    <div className="relative min-h-screen overflow-hidden bg-[#07080A] text-white">
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 scale-105 bg-cover bg-center opacity-55 blur-[2px]"
+        style={{ backgroundImage: `url(${heroBackground})` }}
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,6,9,0.96)_0%,rgba(15,9,9,0.88)_42%,rgba(8,7,9,0.62)_100%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[radial-gradient(circle_at_22%_24%,rgba(180,84,20,0.28),transparent_34%),radial-gradient(circle_at_75%_70%,rgba(112,20,32,0.24),transparent_38%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#07080A] to-transparent"
+      />
       {/* Dynamic Style Injection for Theme Accent Color */}
       {(() => {
         const accentColor = settingsData?.accentColor || '#D97706';
@@ -374,130 +411,211 @@ export function AuthView({ showPasswordLogin = false }: AuthViewProps) {
           }} />
         );
       })()}
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8 bg-transparent">
-          {storeData?.logoUrl ? (
-            <img 
-              src={storeData.logoUrl} 
-              alt={storeData.name || 'Logo'} 
-              className="inline-flex w-16 h-16 rounded-2xl mb-4 object-cover shadow-lg shadow-amber-500/20" 
-            />
-          ) : (
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-amber-500 to-yellow-600 rounded-2xl mb-4 shadow-lg shadow-amber-500/20">
-              <Store className="w-8 h-8 text-black" />
-            </div>
-          )}
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">{storeData?.name || 'BarrelFlow'}</h1>
-          <p
-            className="text-[11px] font-light uppercase cursor-default transition-all duration-300 select-none mt-2"
-            style={{ color: 'rgba(148, 163, 184, 0.55)', letterSpacing: '0.3em' }}
-            onMouseEnter={e => {
-              (e.target as HTMLElement).style.color = 'rgba(251, 191, 36, 0.9)';
-              (e.target as HTMLElement).style.textShadow = '0 0 12px rgba(251, 191, 36, 0.5)';
-            }}
-            onMouseLeave={e => {
-              (e.target as HTMLElement).style.color = 'rgba(148, 163, 184, 0.55)';
-              (e.target as HTMLElement).style.textShadow = 'none';
-            }}
-          >
-            Powered by Andy Gogoi
-          </p>
-          <p className="text-amber-500/80 font-medium text-sm mt-2.5">Fast Billing for Liquor Stores</p>
-        </div>
 
-        {/* Auth Card */}
-        <Card className="bg-[#151C2C]/90 border-slate-800 shadow-2xl backdrop-blur-md">
-          <CardContent className="pt-6 text-slate-200">
-            <form onSubmit={showPasswordLogin ? handleLogin : (event) => event.preventDefault()} className="space-y-4">
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl flex-col px-5 py-5 sm:px-8 lg:px-10">
+        <header className="flex items-center justify-between gap-6 rounded-full border border-white/10 bg-black/20 px-4 py-3 backdrop-blur-md sm:px-5">
+          <div className="flex items-center gap-3">
+            {storeData?.logoUrl ? (
+              <img
+                src={storeData.logoUrl}
+                alt={brandName}
+                className="h-10 w-10 rounded-full object-cover ring-1 ring-amber-300/30"
+              />
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-amber-200/30 bg-gradient-to-br from-[#E8A84C] to-[#7A2D18] shadow-lg shadow-amber-950/40">
+                <Store className="h-5 w-5 text-[#120C08]" />
+              </div>
+            )}
+            <div>
+              <div className="text-sm font-semibold text-white">{brandName}</div>
+              <div className="text-[10px] uppercase text-amber-100/55" style={{ letterSpacing: '0.18em' }}>
+                Liquor POS
+              </div>
+            </div>
+          </div>
+          <nav className="hidden items-center gap-7 text-sm text-stone-200/80 md:flex">
+            <a href="#features" className="transition hover:text-amber-200">Features</a>
+            <a href="#pricing" className="transition hover:text-amber-200">Pricing</a>
+            <a href="#contact" className="transition hover:text-amber-200">Contact</a>
+          </nav>
+        </header>
+
+        <main className="grid flex-1 items-center gap-10 py-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)] lg:py-12">
+          <section className="max-w-3xl pt-4 lg:pt-0">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-200/20 bg-amber-950/25 px-3 py-1.5 text-xs font-medium text-amber-100/85 shadow-sm shadow-black/30 backdrop-blur">
+              <BadgeCheck className="h-3.5 w-3.5 text-amber-300" />
+              POS and billing control for regulated liquor retail
+            </div>
+            <h1 className="max-w-4xl text-4xl font-semibold leading-[1.04] text-white sm:text-5xl lg:text-6xl">
+              Fast Billing. Smarter Stock. Built for Liquor Stores.
+            </h1>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-stone-200/78 sm:text-lg">
+              BarrelFlow helps liquor retailers manage billing, inventory, compliance, and daily operations with speed and control.
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Button
+                type="button"
+                className="h-12 rounded-full bg-[#D8892F] px-6 text-sm font-bold text-[#160B04] shadow-xl shadow-amber-950/35 hover:bg-[#E9A94A]"
+                disabled={isLoading}
+                onClick={handleGoogleSignIn}
+              >
+                Get Started
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
               <Button
                 type="button"
                 variant="outline"
-                className="w-full border-slate-700 bg-[#0B0F19] text-slate-100 hover:bg-slate-800 hover:text-white"
+                className="h-12 rounded-full border-white/15 bg-white/5 px-6 text-sm font-semibold text-stone-100 backdrop-blur hover:bg-white/10 hover:text-white"
                 disabled={isLoading}
-                onClick={() => handleGoogleSignIn()}
+                onClick={handleGoogleSignIn}
               >
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                ) : (
-                  <Chrome className="w-4 h-4 mr-2" />
-                )}
+                <Chrome className="mr-2 h-4 w-4" />
                 Continue with Google
               </Button>
+            </div>
 
-              {showPasswordLogin ? (
-                <>
-                  <div className="flex items-center gap-3 text-xs text-slate-500">
-                    <div className="h-px flex-1 bg-slate-800" />
-                    <span>or</span>
-                    <div className="h-px flex-1 bg-slate-800" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-slate-300">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="admin@demo.com"
-                      value={loginEmail}
-                      onChange={(e) => setLoginEmail(e.target.value)}
-                      required
-                      disabled={isLoading}
-                      className="bg-[#0B0F19] border-slate-800 text-white placeholder-slate-600 focus-visible:ring-amber-500"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between gap-3">
-                      <Label htmlFor="password" className="text-slate-300">Password</Label>
-                      <Button
-                        type="button"
-                        variant="link"
-                        className="h-auto p-0 text-xs text-amber-500 hover:text-amber-400"
-                        disabled={isLoading}
-                        onClick={handlePasswordResetEmail}
-                      >
-                        Send reset link
-                      </Button>
-                    </div>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder="••••••••"
-                        value={loginPassword}
-                        onChange={(e) => setLoginPassword(e.target.value)}
-                        required
-                        disabled={isLoading}
-                        className="bg-[#0B0F19] border-slate-800 text-white placeholder-slate-600 focus-visible:ring-amber-500"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-0 top-0 h-full px-3 text-slate-400 hover:text-white"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </Button>
-                    </div>
-                  </div>
-                  <Button type="submit" className="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-bold" disabled={isLoading}>
-                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2 text-black" /> : null}
-                    Login
-                  </Button>
-                </>
-              ) : (
-                <div className="rounded-md border border-slate-800 bg-[#0B0F19]/80 px-3 py-2 text-center text-xs text-slate-400">
-                  Staff access is managed with Google sign-in.
+            <div id="features" className="mt-10 grid max-w-3xl gap-3 sm:grid-cols-3">
+              {[
+                { icon: ReceiptText, title: 'Rapid billing', text: 'Move queues quickly with POS-first checkout.' },
+                { icon: Boxes, title: 'Stock control', text: 'Track bottles, packs, low stock, and movement.' },
+                { icon: ShieldCheck, title: 'Compliance ready', text: 'Age checks and audit-friendly operations.' },
+              ].map((item) => (
+                <div key={item.title} className="rounded-lg border border-white/10 bg-black/24 p-4 shadow-lg shadow-black/20 backdrop-blur-md">
+                  <item.icon className="mb-3 h-5 w-5 text-amber-300" />
+                  <div className="text-sm font-semibold text-white">{item.title}</div>
+                  <p className="mt-1 text-xs leading-5 text-stone-300/72">{item.text}</p>
                 </div>
-              )}
-            </form>
-          </CardContent>
-        </Card>
+              ))}
+            </div>
+          </section>
 
-        {/* Footer */}
-        <p className="text-center text-xs text-slate-500 mt-6 font-medium">
-          Licensed for Liquor Store POS Operation • Ver. 4.0
-        </p>
+          <aside className="mx-auto w-full max-w-md lg:ml-auto">
+            <Card className="overflow-hidden rounded-2xl border border-amber-100/16 bg-[#100D0C]/68 shadow-2xl shadow-black/45 backdrop-blur-xl">
+              <div className="h-1 bg-gradient-to-r from-[#7B241C] via-[#D8892F] to-[#F2CA7A]" />
+              <CardContent className="p-6 text-stone-100 sm:p-7">
+                <div className="mb-6">
+                  <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-full border border-amber-200/20 bg-amber-500/10">
+                    <BarChart3 className="h-5 w-5 text-amber-300" />
+                  </div>
+                  <h2 className="text-2xl font-semibold text-white">{loginCardTitle}</h2>
+                  <p className="mt-2 text-sm leading-6 text-stone-300/76">{loginCardDescription}</p>
+                </div>
+
+                <form onSubmit={showPasswordLogin ? handleLogin : (event) => event.preventDefault()} className="space-y-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-12 w-full rounded-full border-white/12 bg-white/[0.06] text-stone-100 shadow-sm hover:bg-white/[0.11] hover:text-white"
+                    disabled={isLoading}
+                    onClick={() => handleGoogleSignIn()}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Chrome className="mr-2 h-4 w-4" />
+                    )}
+                    Continue with Google
+                  </Button>
+
+                  {showPasswordLogin ? (
+                    <>
+                      <div className="flex items-center gap-3 text-xs text-stone-500">
+                        <div className="h-px flex-1 bg-white/10" />
+                        <span>or</span>
+                        <div className="h-px flex-1 bg-white/10" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="text-stone-300">Email</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="admin@barrelflow.local"
+                          value={loginEmail}
+                          onChange={(e) => setLoginEmail(e.target.value)}
+                          required
+                          disabled={isLoading}
+                          className="h-11 rounded-lg border-white/10 bg-black/35 text-white placeholder:text-stone-500 focus-visible:ring-amber-500"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <Label htmlFor="password" className="text-stone-300">Password</Label>
+                          <Button
+                            type="button"
+                            variant="link"
+                            className="h-auto p-0 text-xs text-amber-300 hover:text-amber-200"
+                            disabled={isLoading}
+                            onClick={handlePasswordResetEmail}
+                          >
+                            Send reset link
+                          </Button>
+                        </div>
+                        <div className="relative">
+                          <Input
+                            id="password"
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Enter admin password"
+                            value={loginPassword}
+                            onChange={(e) => setLoginPassword(e.target.value)}
+                            required
+                            disabled={isLoading}
+                            className="h-11 rounded-lg border-white/10 bg-black/35 pr-11 text-white placeholder:text-stone-500 focus-visible:ring-amber-500"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-1 top-1 h-9 w-9 rounded-full text-stone-400 hover:bg-white/10 hover:text-white"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                      </div>
+                      <Button
+                        type="submit"
+                        className="h-12 w-full rounded-full bg-[#D8892F] font-bold text-[#170C05] shadow-lg shadow-amber-950/35 hover:bg-[#E9A94A]"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin text-[#170C05]" /> : null}
+                        Login
+                      </Button>
+                    </>
+                  ) : (
+                    <div className="rounded-lg border border-amber-200/10 bg-black/24 px-4 py-3 text-sm leading-6 text-stone-300/76">
+                      Staff access is managed securely with Google sign-in.
+                    </div>
+                  )}
+                </form>
+
+                <div className="mt-6 rounded-lg border border-white/10 bg-white/[0.04] p-4">
+                  <div className="text-xs uppercase text-amber-200/72" style={{ letterSpacing: '0.16em' }}>
+                    Operations snapshot
+                  </div>
+                  <div className="mt-3 grid grid-cols-3 gap-3 text-center">
+                    <div>
+                      <div className="text-lg font-semibold text-white">200+</div>
+                      <div className="text-[11px] text-stone-400">Bills/day</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-semibold text-white">Live</div>
+                      <div className="text-[11px] text-stone-400">Stock</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-semibold text-white">POS</div>
+                      <div className="text-[11px] text-stone-400">Ready</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <p className="mt-5 text-center text-xs font-medium text-stone-400/80">
+              Licensed for liquor store POS operation. Built for retail teams, not consumer delivery.
+            </p>
+          </aside>
+        </main>
       </div>
     </div>
   )
