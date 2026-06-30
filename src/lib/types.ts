@@ -235,15 +235,25 @@ export interface InventoryStatus {
 
 // Default categories for new stores
 export const DEFAULT_CATEGORIES = [
-  { name: 'Groceries', taxRate: 5.0 },
-  { name: 'Dairy', taxRate: 5.0 },
-  { name: 'Beverages', taxRate: 12.0 },
+  { name: 'Whisky', taxRate: 18.0 },
+  { name: 'Rum', taxRate: 18.0 },
+  { name: 'Vodka', taxRate: 18.0 },
+  { name: 'Gin', taxRate: 18.0 },
+  { name: 'Brandy', taxRate: 18.0 },
+  { name: 'Tequila', taxRate: 18.0 },
+  { name: 'Wine', taxRate: 18.0 },
+  { name: 'Beer', taxRate: 18.0 },
+  { name: 'Craft Beer', taxRate: 18.0 },
+  { name: 'Imported Beer', taxRate: 18.0 },
+  { name: 'Liqueurs', taxRate: 18.0 },
+  { name: 'Champagne & Sparkling Wine', taxRate: 18.0 },
+  { name: 'Ready-to-Drink', taxRate: 18.0 },
+  { name: 'Mixers & Soda', taxRate: 12.0 },
+  { name: 'Energy Drinks', taxRate: 18.0 },
+  { name: 'Water & Soft Drinks', taxRate: 12.0 },
+  { name: 'Tobacco & Cigarettes', taxRate: 28.0 },
+  { name: 'Bar Accessories', taxRate: 18.0 },
   { name: 'Snacks', taxRate: 12.0 },
-  { name: 'Personal Care', taxRate: 18.0 },
-  { name: 'Household', taxRate: 18.0 },
-  { name: 'Electronics', taxRate: 18.0 },
-  { name: 'Clothing', taxRate: 5.0 },
-  { name: 'Stationery', taxRate: 18.0 },
   { name: 'Other', taxRate: 18.0 },
 ];
 

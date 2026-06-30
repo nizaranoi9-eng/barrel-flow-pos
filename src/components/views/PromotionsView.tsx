@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DEFAULT_CATEGORIES } from '@/lib/types'
 import { 
   Gift, 
   Plus, 
@@ -221,11 +222,11 @@ export function PromotionsView() {
                   </SelectTrigger>
                   <SelectContent className={selectContentClass}>
                     <SelectItem value="All Items">All Items</SelectItem>
-                    <SelectItem value="Beer">Beer</SelectItem>
-                    <SelectItem value="Whisky">Whisky</SelectItem>
-                    <SelectItem value="Vodka">Vodka</SelectItem>
-                    <SelectItem value="Rum">Rum</SelectItem>
-                    <SelectItem value="Wine">Wine</SelectItem>
+                    {DEFAULT_CATEGORIES.map((category) => (
+                      <SelectItem key={category.name} value={category.name}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

@@ -77,7 +77,7 @@ export function ProductsView() {
     bottleSize: '750ml',
     mrp: '',
     batchNumber: '',
-    expiryDate: 'N/A',
+    expiryDate: '',
     supplier: '',
   })
 
@@ -189,7 +189,7 @@ export function ProductsView() {
       bottleSize: '750ml',
       mrp: '',
       batchNumber: '',
-      expiryDate: 'N/A',
+      expiryDate: '',
       supplier: '',
     })
     setShowProductDialog(true)
@@ -213,7 +213,7 @@ export function ProductsView() {
       bottleSize: product.bottleSize || '750ml',
       mrp: (product.mrp ?? product.sellingPrice).toString(),
       batchNumber: product.batchNumber || '',
-      expiryDate: product.expiryDate || 'N/A',
+      expiryDate: product.expiryDate || '',
       supplier: product.supplier || '',
     })
     setShowProductDialog(true)
@@ -257,7 +257,7 @@ export function ProductsView() {
           bottleSize: formData.bottleSize || null,
           mrp: parseFloat(formData.mrp) || parseFloat(formData.sellingPrice) || 0,
           batchNumber: formData.batchNumber || null,
-          expiryDate: formData.expiryDate || 'N/A',
+          expiryDate: formData.expiryDate || null,
           supplier: formData.supplier || null,
           // Legacy fields for backwards compatibility
           stockQuantity: stockPackages,
@@ -759,9 +759,9 @@ export function ProductsView() {
               <Label htmlFor="expiryDate" className={`text-xs font-semibold ${isDarkBg ? 'text-slate-300' : 'text-slate-700'}`}>Expiry Date</Label>
               <Input
                 id="expiryDate"
+                type="date"
                 value={formData.expiryDate}
                 onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
-                placeholder="YYYY-MM-DD or N/A"
                 className={inputClass}
               />
             </div>

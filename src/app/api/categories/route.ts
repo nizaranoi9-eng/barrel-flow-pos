@@ -1,4 +1,5 @@
 import {
+  ApiError,
   ensureDefaultCategories,
   getContext,
   handleApiError,
@@ -29,13 +30,32 @@ export async function POST(request: Request) {
   try {
     const { supabase, storeId } = await getContext()
     const body = await request.json()
+    const name = typeof body.name === 'string' ? body.name.trim() : ''
+    const taxRate = Number(body.taxRate || 0)
+
+    if (!name) {
+      throw new ApiError('Category name is required.', 400)
+    }
+
+    const { data: existing, error: existingError } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('store_id', storeId)
+      .eq('name', name)
+      .maybeSingle()
+
+    if (existingError) throw existingError
+    if (existing) {
+      throw new ApiError(`Category "${name}" already exists.`, 409)
+    }
+
     const { data, error } = await supabase
       .from('categories')
       .insert({
         id: uid('cat'),
         store_id: storeId,
-        name: body.name,
-        tax_rate: Number(body.taxRate || 0),
+        name,
+        tax_rate: taxRate,
       })
       .select('*')
       .single()

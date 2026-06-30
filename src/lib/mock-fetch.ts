@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { DEFAULT_CATEGORIES } from './types';
 
 // Types representing our local storage database schema
 interface MockDB {
@@ -17,7 +18,7 @@ interface MockDB {
 const STORAGE_KEY = 'barrelflow_mock_db';
 const SESSION_KEY = 'barrelflow_mock_session';
 const AUTH_INDEX_KEY = 'barrelflow_auth_index';
-const DB_VERSION = '9';
+const DB_VERSION = '10';
 
 export const shouldEnableMockApi =
   process.env.NEXT_PUBLIC_ENABLE_MOCK_API === 'true' ||
@@ -287,19 +288,35 @@ function seedMockDatabase(storageKey = STORAGE_KEY, storeId = 'store_barrelflow'
     }
   ];
 
-  const categories = [
-    { id: 'cat_beer', storeId: 'store_barrelflow', name: 'Beer', taxRate: 18.0 },
-    { id: 'cat_whisky', storeId: 'store_barrelflow', name: 'Whisky', taxRate: 20.0 },
-    { id: 'cat_vodka', storeId: 'store_barrelflow', name: 'Vodka', taxRate: 20.0 },
-    { id: 'cat_rum', storeId: 'store_barrelflow', name: 'Rum', taxRate: 20.0 },
-    { id: 'cat_wine', storeId: 'store_barrelflow', name: 'Wine', taxRate: 15.0 },
-    { id: 'cat_gin', storeId: 'store_barrelflow', name: 'Gin', taxRate: 20.0 },
-    { id: 'cat_tequila', storeId: 'store_barrelflow', name: 'Tequila', taxRate: 20.0 },
-    { id: 'cat_brandy', storeId: 'store_barrelflow', name: 'Brandy', taxRate: 20.0 },
-    { id: 'cat_cigarettes', storeId: 'store_barrelflow', name: 'Cigarettes', taxRate: 28.0 },
-    { id: 'cat_snacks', storeId: 'store_barrelflow', name: 'Snacks', taxRate: 12.0 },
-    { id: 'cat_mixers', storeId: 'store_barrelflow', name: 'Mixers', taxRate: 18.0 }
-  ];
+  const categoryIdsByName: Record<string, string> = {
+    Whisky: 'cat_whisky',
+    Rum: 'cat_rum',
+    Vodka: 'cat_vodka',
+    Gin: 'cat_gin',
+    Brandy: 'cat_brandy',
+    Tequila: 'cat_tequila',
+    Wine: 'cat_wine',
+    Beer: 'cat_beer',
+    'Craft Beer': 'cat_craft_beer',
+    'Imported Beer': 'cat_imported_beer',
+    Liqueurs: 'cat_liqueurs',
+    'Champagne & Sparkling Wine': 'cat_champagne_sparkling_wine',
+    'Ready-to-Drink': 'cat_ready_to_drink',
+    'Mixers & Soda': 'cat_mixers_soda',
+    'Energy Drinks': 'cat_energy_drinks',
+    'Water & Soft Drinks': 'cat_water_soft_drinks',
+    'Tobacco & Cigarettes': 'cat_tobacco_cigarettes',
+    'Bar Accessories': 'cat_bar_accessories',
+    Snacks: 'cat_snacks',
+    Other: 'cat_other',
+  };
+
+  const categories = DEFAULT_CATEGORIES.map((category) => ({
+    id: categoryIdsByName[category.name],
+    storeId: 'store_barrelflow',
+    name: category.name,
+    taxRate: category.taxRate,
+  }));
 
   const products = [
     // Beer
@@ -334,14 +351,14 @@ function seedMockDatabase(storageKey = STORAGE_KEY, storeId = 'store_barrelflow'
     // Brandy
     { id: 'prod_16', storeId: 'store_barrelflow', categoryId: 'cat_brandy', name: 'Hennessy VS Cognac', sku: 'BD-HNS-75', barcode: '8901234567016', costPrice: 3500.0, sellingPrice: 5200.0, stockQuantity: 10, unit: 'bottle', brand: 'Hennessy', abv: 40.0, bottleSize: '750ml', mrp: 5200.0, batchNumber: 'B-HN8841', expiryDate: 'N/A', supplier: 'LVMH', stockPackages: 10, packageType: 'bottle', packageSize: 1, measurementUnit: 'ml', isActive: true },
 
-    // Cigarettes
-    { id: 'prod_17', storeId: 'store_barrelflow', categoryId: 'cat_cigarettes', name: 'Marlboro Gold Cigarettes', sku: 'CG-MBG-20', barcode: '8901234567017', costPrice: 280.0, sellingPrice: 380.0, stockQuantity: 150, unit: 'pack', brand: 'Marlboro', abv: 0.0, bottleSize: '20s Pack', mrp: 380.0, batchNumber: 'B-MB1011', expiryDate: '2028-06-30', supplier: 'Philip Morris International', stockPackages: 150, packageType: 'pack', packageSize: 1, measurementUnit: 'piece', isActive: true },
+    // Tobacco & Cigarettes
+    { id: 'prod_17', storeId: 'store_barrelflow', categoryId: 'cat_tobacco_cigarettes', name: 'Marlboro Gold Cigarettes', sku: 'CG-MBG-20', barcode: '8901234567017', costPrice: 280.0, sellingPrice: 380.0, stockQuantity: 150, unit: 'pack', brand: 'Marlboro', abv: 0.0, bottleSize: '20s Pack', mrp: 380.0, batchNumber: 'B-MB1011', expiryDate: '2028-06-30', supplier: 'Philip Morris International', stockPackages: 150, packageType: 'pack', packageSize: 1, measurementUnit: 'piece', isActive: true },
 
     // Snacks
     { id: 'prod_18', storeId: 'store_barrelflow', categoryId: 'cat_snacks', name: 'Lays Classic Salted Chips', sku: 'SN-LYS-01', barcode: '8901234567018', costPrice: 15.0, sellingPrice: 30.0, stockQuantity: 200, unit: 'pcs', brand: 'Lays', abv: 0.0, bottleSize: '50g', mrp: 30.0, batchNumber: 'B-LY4422', expiryDate: '2026-09-30', supplier: 'PepsiCo', stockPackages: 200, packageType: 'bag', packageSize: 1, measurementUnit: 'piece', isActive: true },
 
-    // Mixers
-    { id: 'prod_19', storeId: 'store_barrelflow', categoryId: 'cat_mixers', name: 'Fever-Tree Tonic Water', sku: 'MX-FTT-20', barcode: '8901234567019', costPrice: 70.0, sellingPrice: 120.0, stockQuantity: 80, unit: 'bottle', brand: 'Fever-Tree', abv: 0.0, bottleSize: '200ml', mrp: 120.0, batchNumber: 'B-FT6021', expiryDate: '2027-03-31', supplier: 'Fever-Tree Ltd', stockPackages: 80, packageType: 'bottle', packageSize: 1, measurementUnit: 'ml', isActive: true }
+    // Mixers & Soda
+    { id: 'prod_19', storeId: 'store_barrelflow', categoryId: 'cat_mixers_soda', name: 'Fever-Tree Tonic Water', sku: 'MX-FTT-20', barcode: '8901234567019', costPrice: 70.0, sellingPrice: 120.0, stockQuantity: 80, unit: 'bottle', brand: 'Fever-Tree', abv: 0.0, bottleSize: '200ml', mrp: 120.0, batchNumber: 'B-FT6021', expiryDate: '2027-03-31', supplier: 'Fever-Tree Ltd', stockPackages: 80, packageType: 'bottle', packageSize: 1, measurementUnit: 'ml', isActive: true }
   ];
 
   // Completed transactions
@@ -352,19 +369,19 @@ function seedMockDatabase(storageKey = STORAGE_KEY, storeId = 'store_barrelflow'
       cashierId: 'user_cashier',
       invoiceNumber: 'INV-2026-0001',
       subtotal: 14000.0,
-      taxAmount: 2800.0,
+      taxAmount: 2520.0,
       discountAmount: 500.0,
       discountType: 'flat',
       discountValue: 500,
-      totalAmount: 16300.0,
+      totalAmount: 16020.0,
       paymentMethod: 'card',
       status: 'completed',
       customerEmail: 'cust1@example.com',
       customerPhone: '+91 98765 01001',
       createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
       items: [
-        { productId: 'prod_4', productName: 'Jack Daniel’s Tennessee Whiskey', quantity: 2, unitPrice: 2800.0, taxRate: 20.0, lineTotal: 5600.0 },
-        { productId: 'prod_10', productName: 'Grey Goose Vodka', quantity: 2, unitPrice: 4200.0, taxRate: 20.0, lineTotal: 8400.0 }
+        { productId: 'prod_4', productName: 'Jack Daniel’s Tennessee Whiskey', quantity: 2, unitPrice: 2800.0, taxRate: 18.0, lineTotal: 5600.0 },
+        { productId: 'prod_10', productName: 'Grey Goose Vodka', quantity: 2, unitPrice: 4200.0, taxRate: 18.0, lineTotal: 8400.0 }
       ]
     },
     {
@@ -392,17 +409,17 @@ function seedMockDatabase(storageKey = STORAGE_KEY, storeId = 'store_barrelflow'
       cashierId: 'user_cashier',
       invoiceNumber: 'INV-2026-0003',
       subtotal: 5040.0,
-      taxAmount: 960.0,
+      taxAmount: 892.8,
       discountAmount: 500.0,
       discountType: 'percentage',
       discountValue: 10,
-      totalAmount: 5500.0,
+      totalAmount: 5432.8,
       paymentMethod: 'upi',
       status: 'completed',
       createdAt: new Date().toISOString(),
       items: [
-        { productId: 'prod_15', productName: 'Patrón Silver Tequila', quantity: 1, unitPrice: 4800.0, taxRate: 20.0, lineTotal: 4800.0 },
-        { productId: 'prod_19', productName: 'Fever-Tree Tonic Water', quantity: 2, unitPrice: 120.0, taxRate: 18.0, lineTotal: 240.0 }
+        { productId: 'prod_15', productName: 'Patrón Silver Tequila', quantity: 1, unitPrice: 4800.0, taxRate: 18.0, lineTotal: 4800.0 },
+        { productId: 'prod_19', productName: 'Fever-Tree Tonic Water', quantity: 2, unitPrice: 120.0, taxRate: 12.0, lineTotal: 240.0 }
       ]
     }
   ];
@@ -923,10 +940,18 @@ async function routeRequest(pathname: string, method: string, body: any, query: 
       return jsonResponse({ success: true, data: categoriesWithCount });
     }
     if (method === 'POST') {
+      const name = typeof body.name === 'string' ? body.name.trim() : '';
+      const existing = db.categories.find(c => c.name.trim().toLowerCase() === name.toLowerCase());
+      if (!name) {
+        return jsonResponse({ success: false, error: 'Category name is required.' }, 400);
+      }
+      if (existing) {
+        return jsonResponse({ success: false, error: `Category "${existing.name}" already exists.` }, 409);
+      }
       const newCat = {
         id: 'cat_' + Math.random().toString(36).substr(2, 9),
         storeId: db.store.id,
-        name: body.name,
+        name,
         taxRate: body.taxRate || 10.0
       };
       db.categories.push(newCat);
@@ -940,7 +965,20 @@ async function routeRequest(pathname: string, method: string, body: any, query: 
   if (categoryMatch) {
     const catId = categoryMatch[1];
     if (method === 'PUT') {
-      db.categories = db.categories.map(c => c.id === catId ? { ...c, ...body } : c);
+      const name = typeof body.name === 'string' ? body.name.trim() : '';
+      const duplicate = db.categories.find(c => c.id !== catId && c.name.trim().toLowerCase() === name.toLowerCase());
+      if (!name) {
+        return jsonResponse({ success: false, error: 'Category name is required.' }, 400);
+      }
+      if (duplicate) {
+        db.products = db.products.map(p => p.categoryId === catId ? { ...p, categoryId: duplicate.id } : p);
+        db.categories = db.categories
+          .filter(c => c.id !== catId)
+          .map(c => c.id === duplicate.id ? { ...c, taxRate: body.taxRate || c.taxRate } : c);
+        saveDB(db);
+        return jsonResponse({ success: true, data: db.categories.find(c => c.id === duplicate.id) });
+      }
+      db.categories = db.categories.map(c => c.id === catId ? { ...c, ...body, name } : c);
       saveDB(db);
       return jsonResponse({ success: true, data: db.categories.find(c => c.id === catId) });
     }

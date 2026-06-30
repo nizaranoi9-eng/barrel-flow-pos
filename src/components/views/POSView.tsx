@@ -39,7 +39,7 @@ import {
   Shield
 } from 'lucide-react'
 import { toast } from 'sonner'
-import type { Product } from '@/lib/types'
+import { DEFAULT_CATEGORIES, type Product } from '@/lib/types'
 import { generateReceiptPDF } from '@/lib/pdf-utils'
 
 interface ProductWithCategory extends Omit<Product, 'category'> {
@@ -48,17 +48,7 @@ interface ProductWithCategory extends Omit<Product, 'category'> {
 
 const QUICK_CATEGORIES = [
   'All Items',
-  'Beer',
-  'Whisky',
-  'Vodka',
-  'Rum',
-  'Wine',
-  'Gin',
-  'Tequila',
-  'Brandy',
-  'Cigarettes',
-  'Snacks',
-  'Mixers',
+  ...DEFAULT_CATEGORIES.map((category) => category.name),
 ]
 
 // Unsplash high quality beverage images for products
@@ -175,7 +165,7 @@ export function POSView() {
   const handleConfirmOrderClick = () => {
     const needsAgeVerification = items.some(item => {
       const prod = allProducts.find(p => p.id === item.productId);
-      return prod && ((prod.abv !== undefined && prod.abv > 0) || ['Whisky', 'Beer', 'Vodka', 'Rum', 'Wine', 'Gin', 'Tequila', 'Brandy', 'Cigarettes'].includes(prod.category?.name || ''));
+      return prod && ((prod.abv !== undefined && prod.abv > 0) || ['Whisky', 'Beer', 'Vodka', 'Rum', 'Wine', 'Gin', 'Tequila', 'Brandy', 'Tobacco & Cigarettes'].includes(prod.category?.name || ''));
     });
 
     const isAgeVerificationEnabled = settings?.enableAgeVerification ?? true;

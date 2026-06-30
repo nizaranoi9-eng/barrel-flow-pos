@@ -40,6 +40,26 @@ export function handleApiError(error: unknown) {
     return NextResponse.json({ success: false, error: error.message }, { status: error.status })
   }
 
+  if (typeof error === 'object' && error && 'code' in error) {
+    const dbError = error as { code?: unknown; message?: unknown; details?: unknown }
+    const message = typeof dbError.message === 'string' ? dbError.message : ''
+    const details = typeof dbError.details === 'string' ? dbError.details : ''
+
+    if (dbError.code === '23505') {
+      if (message.includes('products_store_id_sku_key') || details.includes('(sku)')) {
+        return NextResponse.json({ success: false, error: 'A product with this SKU already exists.' }, { status: 409 })
+      }
+      if (message.includes('products_store_id_barcode_key') || details.includes('(barcode)')) {
+        return NextResponse.json({ success: false, error: 'A product with this barcode already exists.' }, { status: 409 })
+      }
+      return NextResponse.json({ success: false, error: 'This record already exists.' }, { status: 409 })
+    }
+
+    if (dbError.code === '23503') {
+      return NextResponse.json({ success: false, error: 'Selected category is no longer available. Please choose another category.' }, { status: 400 })
+    }
+  }
+
   console.error(error)
   return NextResponse.json(
     { success: false, error: 'Something went wrong. Please try again.' },
@@ -244,6 +264,7 @@ export function mapProduct(row: any) {
 
 export function productPayload(body: any, storeId: string, existingId?: string) {
   const stockQuantity = Number(body.stockQuantity ?? body.stockPackages ?? 0)
+  const expiryDate = normalizeDate(body.expiryDate)
   return {
     ...(existingId ? {} : { id: uid('prod') }),
     store_id: storeId,
@@ -263,12 +284,32 @@ export function productPayload(body: any, storeId: string, existingId?: string) 
     bottle_size: body.bottleSize || null,
     mrp: body.mrp === '' || body.mrp == null ? null : Number(body.mrp),
     batch_number: body.batchNumber || null,
-    expiry_date: body.expiryDate || null,
+    expiry_date: expiryDate,
     supplier: body.supplier || null,
     stock_quantity: stockQuantity,
     unit: body.unit || body.measurementUnit || 'piece',
     is_active: body.isActive ?? true,
   }
+}
+
+function normalizeDate(value: unknown) {
+  if (value == null || value === '') return null
+  if (typeof value !== 'string') {
+    throw new ApiError('Expiry date must use YYYY-MM-DD format.', 400)
+  }
+
+  const trimmed = value.trim()
+  if (!trimmed || trimmed.toUpperCase() === 'N/A') return null
+
+  const isIsoDate = /^\d{4}-\d{2}-\d{2}$/.test(trimmed)
+  const parsed = new Date(`${trimmed}T00:00:00.000Z`)
+  const isValidDate = !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === trimmed
+
+  if (!isIsoDate || !isValidDate) {
+    throw new ApiError('Expiry date must use YYYY-MM-DD format.', 400)
+  }
+
+  return trimmed
 }
 
 export function mapCustomer(row: any) {

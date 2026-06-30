@@ -182,10 +182,18 @@ export function SettingsView() {
       const employeesData = await employeesRes.json()
       const categoriesData = await categoriesRes.json()
 
+      if (!employeesRes.ok || !employeesData.success) {
+        throw new Error(employeesData.error || 'Could not load employees')
+      }
+
+      if (!categoriesRes.ok || !categoriesData.success) {
+        throw new Error(categoriesData.error || 'Could not load categories')
+      }
+
       if (employeesData.success) setEmployees(employeesData.data)
       if (categoriesData.success) setCategories(categoriesData.data)
     } catch (error) {
-      toast.error('Failed to load settings')
+      toast.error(error instanceof Error ? error.message : 'Failed to load settings')
     } finally {
       setIsLoading(false)
     }
@@ -394,8 +402,20 @@ export function SettingsView() {
   }
 
   const handleSaveCategory = async () => {
-    if (!categoryForm.name) {
+    const categoryName = categoryForm.name.trim()
+    const duplicateCategory = categories.find(
+      (category) =>
+        category.name.trim().toLowerCase() === categoryName.toLowerCase() &&
+        category.id !== editingCategory?.id
+    )
+
+    if (!categoryName) {
       toast.error('Name is required')
+      return
+    }
+
+    if (!editingCategory && duplicateCategory) {
+      toast.error(`Category "${duplicateCategory.name}" already exists`)
       return
     }
 
@@ -408,7 +428,7 @@ export function SettingsView() {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: categoryForm.name,
+          name: categoryName,
           taxRate: parseFloat(categoryForm.taxRate),
         }),
       })
@@ -416,14 +436,20 @@ export function SettingsView() {
       const data = await response.json()
 
       if (data.success) {
-        toast.success(editingCategory ? 'Category updated' : 'Category added')
+        toast.success(
+          editingCategory && duplicateCategory
+            ? `Merged into "${duplicateCategory.name}"`
+            : editingCategory
+              ? 'Category updated'
+              : 'Category added'
+        )
         setShowCategoryDialog(false)
         loadSettingsData()
       } else {
         toast.error(data.error || 'Failed to save category')
       }
     } catch (error) {
-      toast.error('Failed to save category')
+      toast.error(error instanceof Error ? error.message : 'Failed to save category')
     } finally {
       setIsSaving(false)
     }
